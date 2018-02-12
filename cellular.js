@@ -2,17 +2,18 @@
 //Adjustable parameters
 var cellSize = 5; //pixel size of the cells
 var cellCountX = 100; //cells per row
-var cellCountY = 40; //cells per column
+var cellCountY = 60; //cells per column
 var cellSideWidth = 2; //size of the lines dividing the board
-var bordRight = 50; //how wide the right-hand block of cells is
 
-var colorDeadOne = "#7700AA";
-var colorLiveOne = "#EE00BB";
-var colorDeadTwo = "#443399";
-var colorLiveTwo = "#CC4444"
+var colorDeadOne = "#000000";
+var colorLiveOne = "#FFFFFF";
+var colorDeadTwo = "#000000";
+var colorLiveTwo = "#CCFFFF";
 
-var ruleLiveOne = {born: [3], surv: [2,3]};
-var ruleDeadOne = {born: [3], surv: [2,3,6]};
+var ruleDeadOne = {born: [3], surv: [2,3]};
+var ruleLiveOne = {born: [3], surv: [1,2,3,4,5,6,7,8]};
+var ruleLiveTwo = {born: [3], surv: [2,3]};
+var ruleDeadTwo = {born: [3], surv: [2,3]};
 
 
 //Constructed objects
@@ -52,8 +53,8 @@ function newBoard(numRow, numCol, mode) {
 
 //Function which makes 
 
-//Function which takes input board and draws the board on the canvas
-function drawBoard(canvas, board) {
+//Function which draws the grid of the board
+function drawGrid(canvas) {
 	var context = canvas.getContext("2d");
 
 	//fill edges
@@ -65,38 +66,59 @@ function drawBoard(canvas, board) {
             context.strokeRect(i*cellSize,j*cellSize,cellSize,cellSize);
 		}
 	}
-	for (i = 0; i < cellCountX; i++) {
-		for (j = 0; j < cellCountY; j++) {
-            if (i < cellCountX - bordRight) {
-                context.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
-            }
-		}
-	}
-	context.fillStyle = colorDeadTwo;
-	for (i = 0; i < cellCountX; i++) {
-		for (j = 0; j < cellCountY; j++) {
-			if (i >= cellCountX - bordRight) {
-                context.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
-            }
+}
+
+//Function which takes input board and draws the board on the canvas
+function drawBoard(canvas1, canvas2, board1, board2) {
+	var context1 =  canvas1.getContext('2d');
+	var context2 = canvas2.getContext('2d');
+	
+	context1.fillStyle = colorDeadOne;
+	context2.fillStyle = colorDeadOne;
+	for (j = 0; j < cellCountY; j++) {
+		for (i = 0; i < cellCountX; i++) {
+			if (!board1[j][i] && !board2[j][i]) {
+        context1.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+     		context2.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
 		}
 	}
 
-	//fill cells as on
-	context.fillStyle = colorLiveOne;
-	for (i = 0; i < cellCountX; i++) {
-		for (j = 0; j < cellCountY; j++) {
-            if (board[j][i] == 1 && i < cellCountX - bordRight) {
-                context.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
-            }
+	context1.fillStyle = colorDeadTwo;
+	context2.fillStyle = colorDeadTwo;
+	for (j = 0; j < cellCountY; j++) {
+		for (i = 0; i < cellCountX; i++) {
+      if (!board1[j][i] && board2[j][i]) {
+        context1.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
+      if (!board2[j][i] && board1[j][i]) {
+      	context2.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
 		}
 	}
-	context.fillStyle = colorLiveTwo;
-	for (i = 0; i < cellCountX; i++) {
-		for (j = 0; j < cellCountY; j++) {
-			if (board[j][i] == 1 && i >= cellCountX - bordRight ) {
-				context.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
-			}
+
+	context1.fillStyle = colorLiveOne;
+	context2.fillStyle = colorLiveOne;
+	for (j = 0; j < cellCountY; j++) {
+		for (i = 0; i < cellCountX; i++) {
+      if (board1[j][i] && !board2[j][i]) {
+        context1.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
+      if (board2[j][i] && !board1[j][i]) {
+      	context2.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
 		}
+	}
+
+	context1.fillStyle = colorLiveTwo;
+	context2.fillStyle = colorLiveTwo;
+	for (j = 0; j < cellCountY; j++) {
+		for (i = 0; i < cellCountX; i++) {
+      if (board1[j][i] && board2[j][i]) {
+        context1.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+        context2.fillRect(i*cellSize,j*cellSize,cellSize-cellSideWidth/2,cellSize-cellSideWidth/2);
+      }
+    }
 	}
 }
 
@@ -173,22 +195,24 @@ function duelBoardStep(board1, board2) {
 	var newBoard2 = [];
 
 	for(j = 0; j < cellCountY; j++) {
-		for(i = 0; i < cellCountX - bordRight; i++) {
+		newBoard1.push([]);
+		for(i = 0; i < cellCountX; i++) {
 			if(board2[j][i]) {
-				newBoard1[j][i] = lTest(board, i, j, ruleLiveOne['born'], ruleLiveOne['surv']);
+				newBoard1[j].push(lTest(board1, i, j, ruleLiveOne['born'], ruleLiveOne['surv']));
 			} else {
-				newBoard1[j][i] = lTest(board, i, j, ruleDeadOne['born'], ruleDeadOne['surv']);
+				newBoard1[j].push(lTest(board1, i, j, ruleDeadOne['born'], ruleDeadOne['surv']));
 			}
 			
 		}
 	}
 
 	for(j = 0; j < cellCountY; j++) {
-		for(i = 0; i < cellCountX - bordRight; i++) {
+		newBoard2.push([]);
+		for(i = 0; i < cellCountX; i++) {
 			if(board1[j][i]) {
-				newBoard2[j][i] = lTest(board, i, j, ruleLiveTwo['born'], ruleLiveTwo['surv']);
+				newBoard2[j].push(lTest(board2, i, j, ruleLiveTwo['born'], ruleLiveTwo['surv']));
 			} else {
-				newBoard2[j][i] = lTest(board, i, j, ruleDeadTwo['born'], ruleDeadTwo['surv']);
+				newBoard2[j].push(lTest(board2, i, j, ruleDeadTwo['born'], ruleDeadTwo['surv']));
 			}
 			
 		}
@@ -230,12 +254,19 @@ function drawCells() {
 	drawBoard(canvas2, board_two);
 }
 
+function drawCells2() {
+	var canvas1 = document.getElementById('board1');
+	var canvas2 = document.getElementById('board2');
+	[board_one, board_two] = duelBoardStep(board_one, board_two);
+	drawBoard(canvas1, canvas2, board_one, board_two);
+}
+
 
 
 function boardRun() {
     if(!intervalID) {
         intervalID = window.setInterval(function() {
-    		drawCells();
+    		drawCells2();
     	}, 40);
     }
 }
@@ -277,8 +308,10 @@ function initBoard() {
     board_one = newBoard(cellCountY, cellCountX, 1);
     board_two = newBoard(cellCountY, cellCountX, 1);
 
-	drawBoard(canvas1, board_one);
-    drawBoard(canvas2, board_two);
+    drawGrid(canvas1);
+    drawGrid(canvas2);
+
+		drawBoard(canvas1, canvas2, board_one, board_two);
 }
 
 
