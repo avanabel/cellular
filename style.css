@@ -1,0 +1,12 @@
+body {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.ctrl-hid {
+    display: none;
+}
+
+#toggle-ctrl {
+    float: right;
+}

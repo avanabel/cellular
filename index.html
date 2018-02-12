@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Canvas</title>
+	<script src="cellular.js"></script>
+        <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+        <input type="button" id="toggle-ctrl" onclick="toggleCtrl()" value="Options" />        
+        <div id="control-div" class="ctrl-hid">
+                <form name="Options" action="" method="get" >
+                        Width: <input type="text" name="cellcountx" size="3" /> cells <br/> 
+                        Height: <input type="text" name="cellcounty" size="3" /> cells <br/>
+                        Cell size: <input type="text" name="cellsize" size="3" /> px <br/> <br>
+                        Colors: <input type="color" name="liveone" value="#EE00BB"/>
+                        <input type="color" name="deadone" value="#7700AA"/>
+                        <input type="color" name="livetwo" value="#CC4444" />
+                        <input type="color" name="deadtwo" value="#443399"/>
+                        <input type="button" name="update" value="Update" onclick="updateSettings(this.form)"/>
+                </form>
+        </div>
+        <div>
+        	<canvas id="board1" width="500" height="500"
+        		style="border: 1px solid #cccccc;">
+        	</canvas>
+        </div>
+        <div>
+                <canvas id="board2" width="500" height="500"
+                        style="border: 1px solid #cccccc;">
+                </canvas>
+        </div>
+	<input type="button" id="btn-onestep" onclick="drawCells2()" value="One Step"/>
+        <input type="button" id="btn-pause" onclick="boardPause()" value="Pause" />
+        <input type="button" id="btn-run" onclick="boardRun()" value="Run" />
+</body>
+</html> 
